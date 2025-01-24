@@ -15,19 +15,24 @@ let protectRoute = role => {
             let result = jwt.verify(token, process.env.TOKEN_SECRET);
             User.findOne({email: result.login})
             .then(result => {
-                if (result && (role === "" || result.role === "admin" || role === result.role))
+                if (result && (result.role === "admin" || role === result.role))
                     next();
                 else
                     res.status(401)
-                        .send({ok: false, error: "Unauthorized user"});  
+                        .send({ok: false, error: "Unauthorized user"});
             }).catch(error => {
                 res.status(400)
                     .send({ok: false, error: "User not found"});
             });
-                  
-        } else 
-            res.status(401)
-                .send({ok: false, error: "Unauthorized user"});        
+
+        } else {
+            if (role === "")
+                next();
+            else
+                res.status(401)
+                    .send({ok: false, error: "Unauthorized user"});
+        }
     }
 };
+
 exports.protectRoute = protectRoute;
